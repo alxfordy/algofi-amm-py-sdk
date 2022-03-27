@@ -85,7 +85,7 @@ class AlgofiAMMClient():
         if not address:
             address = self.user_address
         if address:
-            return self.algod.account_info(address)
+            return self.indexer.account_info(address)['account']
         else:
             raise Exception("user_address has not been specified")
 
@@ -217,7 +217,8 @@ class AlgofiAMMTestnetClient(AlgofiAMMClient):
         """
         historical_indexer_client = IndexerClient("", "https://indexer.testnet.algoexplorerapi.io/", headers={"User-Agent": "algosdk"})
         if algod_client is None:
-            algod_client = AlgodClient("", "https://api.testnet.algoexplorer.io", headers={"User-Agent": "algosdk"})
+            algod_client = AlgodClient("", "https://node.testnet.algoexplorer.io", headers={"User-Agent": "algosdk"})
+            
         if indexer_client is None:
             indexer_client = IndexerClient("", "https://algoindexer.testnet.algoexplorerapi.io", headers={"User-Agent": "algosdk"})
         super().__init__(algod_client, indexer_client=indexer_client, historical_indexer_client=historical_indexer_client, user_address=user_address, network=Network.TESTNET)
@@ -236,7 +237,7 @@ class AlgofiAMMMainnetClient(AlgofiAMMClient):
         """
         historical_indexer_client = IndexerClient("", "https://indexer.algoexplorerapi.io/", headers={"User-Agent": "algosdk"})
         if algod_client is None:
-            algod_client = AlgodClient("", "https://algoexplorerapi.io", headers={"User-Agent": "algosdk"})
+            algod_client = AlgodClient("", "https://node.algoexplorerapi.io", headers={"User-Agent": "algosdk"})
         if indexer_client is None:
             indexer_client = IndexerClient("", "https://algoindexer.algoexplorerapi.io", headers={"User-Agent": "algosdk"})
         super().__init__(algod_client, indexer_client=indexer_client, historical_indexer_client=historical_indexer_client, user_address=user_address, network=Network.MAINNET)
