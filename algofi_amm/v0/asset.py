@@ -32,7 +32,7 @@ class Asset():
             self.unit_name = "ALGO"
             self.url = "https://www.algorand.com/"
         else:
-            asset_info = amm_client.algod.asset_info(asset_id)
+            asset_info = amm_client.indexer.asset_info(asset_id)['asset']
             self.creator = asset_info["params"]["creator"]
             self.decimals = asset_info["params"]["decimals"]
             self.default_frozen = asset_info["params"].get("default-frozen", False)
