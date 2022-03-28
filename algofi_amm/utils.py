@@ -64,18 +64,18 @@ def send_and_wait(algod_client, stxns):
     return transaction_response
 
 
-def get_application_global_state(algod_client, application_id):
+def get_application_global_state(indexer_client, application_id):
     """Returns dictionary of global state for a given application
 
-    :param algod_client: :class:`AlgodClient` object for interacting with network
-    :type algod_client: :class:`AlgodClient`
+    :param indexer_client: :class:`IndexerClient` object for interacting with network
+    :type indexer_client: :class:`IndexerClient`
     :param application_id: application id
     :type application_id: int
     :return: dictionary of global state for given application
     :rtype: dict
     """
 
-    application_info = algod_client.application_info(application_id)
+    application_info = indexer_client.applications(application_id)["application"]
     application_global_state = application_info["params"]["global-state"]
     formatted_global_state = {}
     for keyvalue in application_global_state:
@@ -87,11 +87,11 @@ def get_application_global_state(algod_client, application_id):
     return formatted_global_state
 
 
-def get_application_local_state(algod_client, address, application_id):
+def get_application_local_state(indexer_client, address, application_id):
     """Returns dictionary of global state for a given application
 
-    :param algod_client: :class:`AlgodClient` object for interacting with network
-    :type algod_client: :class:`AlgodClient`
+    :param indexer_client: :class:`IndexerClient` object for interacting with network
+    :type indexer_client: :class:`IndexerClient`
     :param address: an account address
     :type address: str
     :param application_id: application id
@@ -100,7 +100,7 @@ def get_application_local_state(algod_client, address, application_id):
     :rtype: dict
     """
 
-    account_info = algod_client.account_info(address)
+    account_info = indexer_client.account_info(address)["account"]
     application_local_state = account_info["apps-local-state"]
     formatted_local_state = {}
     for state in application_local_state:
@@ -114,11 +114,11 @@ def get_application_local_state(algod_client, address, application_id):
     return formatted_local_state
 
 
-def get_account_balances(algod_client, address, filter_zero_balances=False):
+def get_account_balances(indexer_client, address, filter_zero_balances=False):
     """Returns dictionary of global state for a given application
 
-    :param algod_client: :class:`AlgodClient` object for interacting with network
-    :type algod_client: :class:`AlgodClient`
+    :param indexer_client: :class:`IndexerClient` object for interacting with network
+    :type indexer_client: :class:`IndexerClient`
     :param address: an account address
     :type address: str
     :param filter_zero_balances: include assets with zero balance
@@ -128,7 +128,7 @@ def get_account_balances(algod_client, address, filter_zero_balances=False):
     """
 
     balances = {}
-    account_info = algod_client.account_info(address)
+    account_info = indexer_client.account_info(address)["account"]
     if filter_zero_balances:
         if account_info["amount"] > 0:
             balances[1] = account_info["amount"]
