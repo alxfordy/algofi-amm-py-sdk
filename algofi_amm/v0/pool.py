@@ -67,7 +67,7 @@ class Pool:
         else:
             self.logic_sig = LogicSigAccount(generate_logic_sig(asset1.asset_id, asset2.asset_id, self.manager_application_id, self.validator_index))
             # get local state
-            logic_sig_local_state = get_application_local_state(self.algod, self.logic_sig.address(), self.manager_application_id)
+            logic_sig_local_state = get_application_local_state(self.indexer, self.logic_sig.address(), self.manager_application_id)
             if logic_sig_local_state:
                 self.pool_status = PoolStatus.ACTIVE
             else:
@@ -86,7 +86,7 @@ class Pool:
         if self.application_id:
             self.address = get_application_address(self.application_id)
             # get global state
-            pool_state = get_application_global_state(self.algod, self.application_id)
+            pool_state = get_application_global_state(self.indexer, self.application_id)
             self.lp_asset_id = pool_state[pool_strings.lp_id]
             self.admin = pool_state[pool_strings.admin]
             self.reserve_factor = pool_state[pool_strings.reserve_factor]
@@ -101,7 +101,7 @@ class Pool:
         """
 
         if self.pool_type != PoolType.NANOSWAP:
-            logic_sig_local_state = get_application_local_state(self.algod, self.logic_sig.address(), self.manager_application_id)
+            logic_sig_local_state = get_application_local_state(self.indexer, self.logic_sig.address(), self.manager_application_id)
             if logic_sig_local_state:
                 self.pool_status = PoolStatus.ACTIVE
             else:
@@ -118,7 +118,7 @@ class Pool:
 
                 self.address = get_application_address(self.application_id)
                 # get global state
-                pool_state = get_application_global_state(self.algod, self.application_id)
+                pool_state = get_application_global_state(self.indexer, self.application_id)
                 self.lp_asset_id = pool_state[pool_strings.lp_id]
                 self.admin = pool_state[pool_strings.admin]
                 self.reserve_factor = pool_state[pool_strings.reserve_factor]
@@ -130,7 +130,7 @@ class Pool:
         """
 
         # load pool state
-        pool_state = get_application_global_state(self.algod, self.application_id)
+        pool_state = get_application_global_state(self.indexer, self.application_id)
         self.asset1_balance = pool_state[pool_strings.balance_1]
         self.asset2_balance = pool_state[pool_strings.balance_2]
         self.lp_circulation = pool_state[pool_strings.lp_circulation]
