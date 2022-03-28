@@ -32,7 +32,6 @@ class Asset():
             self.unit_name = "ALGO"
             self.url = "https://www.algorand.com/"
         else:
-
             asset_info = amm_client.indexer.asset_info(asset_id)
             self.creator = asset_info["asset"]["params"]["creator"]
             self.decimals = asset_info["asset"]["params"]["decimals"]
