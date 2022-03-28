@@ -85,7 +85,7 @@ class AlgofiAMMClient():
         if not address:
             address = self.user_address
         if address:
-            return self.algod.account_info(address)
+            return self.indexer.account_info(address)["account"]
         else:
             raise Exception("user_address has not been specified")
 
