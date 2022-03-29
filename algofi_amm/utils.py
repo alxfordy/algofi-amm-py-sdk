@@ -75,6 +75,7 @@ def get_application_global_state(indexer_client, application_id):
     :rtype: dict
     """
 
+    formatted_global_state = {}
     application_info = indexer_client.applications(application_id).get("application", {})
     if application_info:
         application_global_state = application_info["params"]["global-state"]
@@ -128,6 +129,7 @@ def get_account_balances(indexer_client, address, filter_zero_balances=False):
     :rtype: dict
     """
 
+    balances = {}
     account_info = indexer_client.account_info(address).get("account", {})
     if account_info:
         if filter_zero_balances:

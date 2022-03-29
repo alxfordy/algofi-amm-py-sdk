@@ -5,7 +5,7 @@ from algosdk.logic import get_application_address
 from algosdk.future.transaction import LogicSigAccount, LogicSigTransaction, OnComplete, StateSchema, ApplicationCreateTxn, \
     ApplicationOptInTxn, ApplicationNoOpTxn, OnComplete
 from .config import PoolStatus, Network, get_validator_index, get_approval_program_by_pool_type, \
-    get_clear_state_program, get_swap_fee, get_manager_application_id, PoolType, TESTNET_NANOSWAP_POOLS,
+    get_clear_state_program, get_swap_fee, get_manager_application_id, PoolType, TESTNET_NANOSWAP_POOLS, \
     MAINNET_NANOSWAP_POOLS
 from .balance_delta import BalanceDelta
 from .logic_sig_generator import generate_logic_sig
