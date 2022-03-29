@@ -9,6 +9,12 @@ from ..contract_strings import algofi_manager_strings as manager_strings
 # constants
 ALGO_ASSET_ID = 1
 
+# nanoswap pools
+TESTNET_NANOSWAP_POOLS = {(77279127, 77279142): 77282939}  # (asset1_id, asset2_id) -> app_id
+MAINNET_NANOSWAP_POOLS = {(31566704, 465865291): 658337046,
+                          (312769, 465865291): 659677335,
+                          (312769, 31566704): 659678644}
+
 # valid pool app ids
 b64_to_utf_keys = {
     b64encode(bytes(pool_strings.asset1_id, "utf-8")).decode("utf-8"): pool_strings.asset1_id,

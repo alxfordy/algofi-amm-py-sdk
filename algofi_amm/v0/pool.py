@@ -5,7 +5,8 @@ from algosdk.logic import get_application_address
 from algosdk.future.transaction import LogicSigAccount, LogicSigTransaction, OnComplete, StateSchema, ApplicationCreateTxn, \
     ApplicationOptInTxn, ApplicationNoOpTxn, OnComplete
 from .config import PoolStatus, Network, get_validator_index, get_approval_program_by_pool_type, \
-    get_clear_state_program, get_swap_fee, get_manager_application_id, PoolType
+    get_clear_state_program, get_swap_fee, get_manager_application_id, PoolType, TESTNET_NANOSWAP_POOLS, \
+    MAINNET_NANOSWAP_POOLS
 from .balance_delta import BalanceDelta
 from .logic_sig_generator import generate_logic_sig
 from .stable_swap_math import get_D, get_y
@@ -37,15 +38,14 @@ class Pool:
         if (asset1.asset_id >= asset2.asset_id):
             raise Exception("Invalid asset ordering. Asset 1 id must be less than asset 2 id.")
 
+        # load nodes + network data
         self.algod = algod_client
         self.indexer = indexer_client
         self.historical_indexer = historical_indexer_client
         self.network = network
+
+        # load generic pool metadata
         self.pool_type = pool_type
-        self.testnet_nanoswap_pools = {(77279127, 77279142): 77282939}  # (asset1_id, asset2_id) -> app_id
-        self.mainnet_nanoswap_pools = {(31566704, 465865291): 658337046,
-                                       (312769, 465865291): 659677335,
-                                       (312769, 31566704): 659678644}
         self.asset1 = asset1
         self.asset2 = asset2
         self.manager_application_id = get_manager_application_id(network, pool_type == PoolType.NANOSWAP)
@@ -53,11 +53,13 @@ class Pool:
         self.validator_index = get_validator_index(network, pool_type)
         self.swap_fee = get_swap_fee(pool_type)
 
+        # load pool status + application id if available
+        self.application_id = None
         if pool_type == PoolType.NANOSWAP:
             if self.network == Network.TESTNET:
-                self.nanoswap_pools = self.testnet_nanoswap_pools
+                self.nanoswap_pools = TESTNET_NANOSWAP_POOLS
             else:
-                self.nanoswap_pools = self.mainnet_nanoswap_pools
+                self.nanoswap_pools = MAINNET_NANOSWAP_POOLS
             key = (asset1.asset_id, asset2.asset_id)
             if key not in self.nanoswap_pools:
                 raise Exception("Nanoswap pool does not exist")
@@ -65,8 +67,8 @@ class Pool:
                 self.pool_status = PoolStatus.ACTIVE
                 self.application_id = self.nanoswap_pools[key]
         else:
-            self.logic_sig = LogicSigAccount(generate_logic_sig(asset1.asset_id, asset2.asset_id, self.manager_application_id, self.validator_index))
             # get local state
+            self.logic_sig = LogicSigAccount(generate_logic_sig(asset1.asset_id, asset2.asset_id, self.manager_application_id, self.validator_index))
             logic_sig_local_state = get_application_local_state(self.indexer, self.logic_sig.address(), self.manager_application_id)
             if logic_sig_local_state:
                 self.pool_status = PoolStatus.ACTIVE
@@ -85,19 +87,31 @@ class Pool:
         # if application id has been set, then either nanoswap pool or vanilla pool is active
         if self.application_id:
             self.address = get_application_address(self.application_id)
-            # get global state
+            # save down pool metadata
             pool_state = get_application_global_state(self.indexer, self.application_id)
             self.lp_asset_id = pool_state[pool_strings.lp_id]
             self.admin = pool_state[pool_strings.admin]
             self.reserve_factor = pool_state[pool_strings.reserve_factor]
             self.flash_loan_fee = pool_state[pool_strings.flash_loan_fee]
             self.max_flash_loan_ratio = pool_state[pool_strings.max_flash_loan_ratio]
+            
+            # additionally save down nanoswap metadata if applicable
+            if self.pool_type == PoolType.NANOSWAP:
+                self.initial_amplification_factor = pool_state.get(pool_strings.initial_amplification_factor, 0)
+                self.future_amplification_factor = pool_state[pool_strings.future_amplification_factor]
+                self.initial_amplification_factor_time = pool_state.get(pool_strings.initial_amplification_factor_time, 0)
+                self.future_amplification_factor_time = pool_state.get(pool_strings.future_amplification_factor_time, 0)
+                status = self.algod.status()
+                last_round = status["last-round"]
+                block = self.algod.block_info(last_round)
+                timestamp = block["block"]["ts"]
+                self.t = timestamp
+
             # refresh state
             self.refresh_state()
 
     def refresh_metadata(self):
         """Refresh the metadata of the pool (e.g. if now initialized).
-        Can only refresh metadata of vanilla pools.
         """
 
         if self.pool_type != PoolType.NANOSWAP:
@@ -124,6 +138,17 @@ class Pool:
                 self.reserve_factor = pool_state[pool_strings.reserve_factor]
                 self.flash_loan_fee = pool_state[pool_strings.flash_loan_fee]
                 self.max_flash_loan_ratio = pool_state[pool_strings.max_flash_loan_ratio]
+        else:
+            pool_state = get_application_global_state(self.indexer, self.application_id)
+            self.initial_amplification_factor = pool_state.get(pool_strings.initial_amplification_factor, 0)
+            self.future_amplification_factor = pool_state[pool_strings.future_amplification_factor]
+            self.initial_amplification_factor_time = pool_state.get(pool_strings.initial_amplification_factor_time, 0)
+            self.future_amplification_factor_time = pool_state.get(pool_strings.future_amplification_factor_time, 0)
+            status = self.algod.status()
+            last_round = status["last-round"]
+            block = self.algod.block_info(last_round)
+            timestamp = block["block"]["ts"]
+            self.t = timestamp
 
     def refresh_state(self):
         """Refresh the global state of the pool
@@ -145,17 +170,6 @@ class Pool:
         self.cumsum_volume_weighted_asset2_to_asset1_price = pool_state[pool_strings.cumsum_volume_weighted_asset2_to_asset1_price]
         self.cumsum_fees_asset1 = pool_state[pool_strings.cumsum_fees_asset1]
         self.cumsum_fees_asset2 = pool_state[pool_strings.cumsum_fees_asset2]
-
-        if self.pool_type == PoolType.NANOSWAP:
-            self.initial_amplification_factor = pool_state.get(pool_strings.initial_amplification_factor, 0)
-            self.future_amplification_factor = pool_state[pool_strings.future_amplification_factor]
-            self.initial_amplification_factor_time = pool_state.get(pool_strings.initial_amplification_factor_time, 0)
-            self.future_amplification_factor_time = pool_state.get(pool_strings.future_amplification_factor_time, 0)
-            status = self.algod.status()
-            last_round = status["last-round"]
-            block = self.algod.block_info(last_round)
-            timestamp = block["block"]["ts"]
-            self.t = timestamp
 
     def get_pool_price(self, asset_id):
         """Gets the price of the pool in terms of the asset with given asset_id

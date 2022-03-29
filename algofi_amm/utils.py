@@ -75,16 +75,18 @@ def get_application_global_state(indexer_client, application_id):
     :rtype: dict
     """
 
-    application_info = indexer_client.applications(application_id)["application"]
-    application_global_state = application_info["params"]["global-state"]
     formatted_global_state = {}
-    for keyvalue in application_global_state:
-        key, value = keyvalue["key"], keyvalue["value"]
-        key_formatted = b64decode(key).decode("utf-8")
-        value = value["uint"] if value["type"] == 2 else value["bytes"]
-        formatted_global_state[key_formatted] = value
-
-    return formatted_global_state
+    application_info = indexer_client.applications(application_id).get("application", {})
+    if application_info:
+        application_global_state = application_info["params"]["global-state"]
+        for keyvalue in application_global_state:
+            key, value = keyvalue["key"], keyvalue["value"]
+            key_formatted = b64decode(key).decode("utf-8")
+            value = value["uint"] if value["type"] == 2 else value["bytes"]
+            formatted_global_state[key_formatted] = value
+        return formatted_global_state
+    else:
+        raise Exception("Application does not exist.")
 
 
 def get_application_local_state(indexer_client, address, application_id):
@@ -99,18 +101,18 @@ def get_application_local_state(indexer_client, address, application_id):
     :return: dictionary of local state of account for given application
     :rtype: dict
     """
-
-    account_info = indexer_client.account_info(address)["account"]
-    application_local_state = account_info["apps-local-state"]
+    
     formatted_local_state = {}
-    for state in application_local_state:
-        if (state["id"] == application_id) and (state["key-value"]):
-            for keyvalue in state["key-value"]:
-                key, value = keyvalue["key"], keyvalue["value"]
-                key_formatted = b64decode(key).decode("utf-8")
-                value = value["uint"] if value["type"] == 2 else value["bytes"]
-                formatted_local_state[key_formatted] = value
-
+    account_info = indexer_client.account_info(address).get("account", {})
+    if account_info:
+        application_local_state = account_info["apps-local-state"]
+        for state in application_local_state:
+            if (state["id"] == application_id) and (state["key-value"]):
+                for keyvalue in state["key-value"]:
+                    key, value = keyvalue["key"], keyvalue["value"]
+                    key_formatted = b64decode(key).decode("utf-8")
+                    value = value["uint"] if value["type"] == 2 else value["bytes"]
+                    formatted_local_state[key_formatted] = value
     return formatted_local_state
 
 
@@ -128,23 +130,25 @@ def get_account_balances(indexer_client, address, filter_zero_balances=False):
     """
 
     balances = {}
-    account_info = indexer_client.account_info(address)["account"]
-    if filter_zero_balances:
-        if account_info["amount"] > 0:
-            balances[1] = account_info["amount"]
-    else:
-        balances[1] = account_info["amount"]
-
-    assets = account_info.get("assets", [])
-    for asset in assets:
-        asset_id, amount = asset["asset-id"], asset["amount"]
+    account_info = indexer_client.account_info(address).get("account", {})
+    if account_info:
         if filter_zero_balances:
-            if amount > 0:
-                balances[asset_id] = amount
+            if account_info["amount"] > 0:
+                balances[1] = account_info["amount"]
         else:
-            balances[asset_id] = amount
+            balances[1] = account_info["amount"]
 
-    return balances
+        assets = account_info.get("assets", [])
+        for asset in assets:
+            asset_id, amount = asset["asset-id"], asset["amount"]
+            if filter_zero_balances:
+                if amount > 0:
+                    balances[asset_id] = amount
+            else:
+                balances[asset_id] = amount
+        return balances
+    else:
+        raise Exception("Account does not exist.")
 
 
 def get_params(algod_client, fee=1000, flat_fee=True):
