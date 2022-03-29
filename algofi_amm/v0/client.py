@@ -87,7 +87,7 @@ class AlgofiAMMClient():
         if address:
             return self.indexer.account_info(address).get("account", {})
         else:
-            raise Exception("user_address has not been specified")
+            raise Exception("address has not been specified")
 
     def is_opted_into_app(self, app_id, address=None):
         """Returns a boolean if the user address is opted into an application with id app_id
