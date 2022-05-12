@@ -122,6 +122,8 @@ class AlgofiAMMClient():
             if not address:
                 address = self.user_address
             user_info = self.get_user_info(address)
+            if user_info.get("total-assets-opted-in") == 0:
+                return []
             return asset.asset_id in [x['asset-id'] for x in user_info['assets']]
 
     def get_user_balances(self, address=None):
@@ -136,6 +138,8 @@ class AlgofiAMMClient():
         if not address:
             address = self.user_address
         user_info = self.get_user_info(address)
+        if not user_info.get("assets"):
+            return [{1: user_info["amount"]}]
         balances = {asset["asset-id"] : asset["amount"] for asset in user_info["assets"]}
         balances[1] = user_info["amount"]
         return balances
