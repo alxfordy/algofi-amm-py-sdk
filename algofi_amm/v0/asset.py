@@ -74,17 +74,17 @@ class Asset():
         pool_type = PoolType.CONSTANT_PRODUCT_30BP_FEE if (self.amm_client.network == Network.TESTNET) else PoolType.CONSTANT_PRODUCT_25BP_FEE
         usdc_pool = self.amm_client.get_pool(pool_type, self.asset_id, usdc_asset_id)
         if (usdc_pool == PoolStatus.ACTIVE):
-            self.price = usdc_pool.get_pool_price(self.asset_id) * (10**(self.decimals - USDC_DECIMALS))
+            self.price = usdc_pool.get_pool_price(self.asset_id)
             return
         
         stbl_pool = self.amm_client.get_pool(pool_type, self.asset_id, stbl_asset_id)
         if (stbl_pool.pool_status == PoolStatus.ACTIVE):
-            self.price = (stbl_pool.get_pool_price(self.asset_id)) * (10**(self.decimals - STBL_DECIMALS))
+            self.price = stbl_pool.get_pool_price(self.asset_id)
             return
         
         algo_pool = self.amm_client.get_pool(pool_type, self.asset_id, ALGO_ASSET_ID)
         if (algo_pool.pool_status == PoolStatus.ACTIVE):
-            price_in_algo = algo_pool.get_pool_price(self.asset_id) * (10**(self.decimals - ALGO_DECIMALS))
+            price_in_algo = algo_pool.get_pool_price(self.asset_id)
             usdc_algo_pool = self.amm_client.get_pool(pool_type, usdc_asset_id, ALGO_ASSET_ID)
             if (usdc_algo_pool.pool_status == PoolStatus.ACTIVE):
                 self.price = price_in_algo * usdc_algo_pool.get_pool_price(ALGO_ASSET_ID)

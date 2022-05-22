@@ -173,7 +173,6 @@ class Pool:
 
     def get_pool_price(self, asset_id):
         """Gets the price of the pool in terms of the asset with given asset_id
-
         :param asset_id: asset id of the asset to price
         :type asset_id: int
         :return: price of pool in terms of asset with given asset_id
@@ -181,9 +180,9 @@ class Pool:
         """
 
         if (asset_id == self.asset1.asset_id):
-            return self.asset1_balance / self.asset2_balance
+            return self.asset2_balance / self.asset1_balance * 10**(self.asset1.decimals - self.asset2.decimals)
         elif (asset_id == self.asset2.asset_id):
-            return self.asset2_balance / self.asset1_balance
+            return self.asset1_balance / self.asset2_balance * 10**(self.asset2.decimals - self.asset1.decimals)
         else:
             raise Exception("Invalid asset id")
 
