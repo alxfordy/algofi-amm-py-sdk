@@ -1,6 +1,6 @@
 # algofi-amm-py-sdk
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Algofiorg/algofi-amm-py-sdk/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Algofiorg/algofi-amm-py-sdk/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Algofiorg/algofi-amm-py-sdk/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/Algofiorg/algofi-amm-py-sdk/tree/main)
 [![Documentation Status](https://readthedocs.org/projects/algofi-amm-py-sdk/badge/?version=latest)](https://algofi-amm-py-sdk.readthedocs.io/en/latest/?badge=latest)
 
 Official Python SDK for the Algofi DEX
