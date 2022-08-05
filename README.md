@@ -1,4 +1,8 @@
 # algofi-amm-py-sdk
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Algofiorg/algofi-amm-py-sdk/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Algofiorg/algofi-amm-py-sdk/tree/main)
+[![Documentation Status](https://readthedocs.org/projects/algofi-amm-py-sdk/badge/?version=latest)](https://algofi-amm-py-sdk.readthedocs.io/en/latest/?badge=latest)
+
 Official Python SDK for the Algofi DEX
 
 ## Documentation
@@ -8,7 +12,6 @@ https://algofi-amm-py-sdk.readthedocs.io/en/latest/index.html
 This SDK is useful for developers who want to programatically interact with the Algofi DEX.
 
 ## Status
-[![Documentation Status](https://readthedocs.org/projects/algofi-amm-py-sdk/badge/?version=latest)](https://algofi-amm-py-sdk.readthedocs.io/en/latest/?badge=latest)
 
 This SDK is currently under active early development and should not be considered stable.
 
