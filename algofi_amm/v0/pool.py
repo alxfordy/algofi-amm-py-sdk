@@ -152,6 +152,9 @@ class Pool:
 
     def refresh_state(self, block=None):
         """Refresh the global state of the pool
+
+        :param block: block at which to query historical state
+        :type block: int, optional
         """
 
         # load pool state
