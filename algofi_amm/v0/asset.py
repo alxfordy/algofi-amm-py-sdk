@@ -53,6 +53,13 @@ class Asset():
                 "freeze": self.freeze, "manager": self.manager, "name": self.name, "reserve": self.reserve, "total": self.total,
                 "unit_name": self.unit_name, "url": self.url})
 
+    def __hash__(self) -> int:
+        """Returns an int which is the asset_id of the :class:`Asset` current object
+        :return: asset_id
+        :rtype: int
+        """
+        return self.asset_id
+
     def get_scaled_amount(self, amount):
         """Returns an integer representation of asset amount scaled by asset's decimals
         :param amount: amount of asset
